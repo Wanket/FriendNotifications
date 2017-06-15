@@ -1,0 +1,11 @@
+{
+	"enable": true,
+	"debug": false,
+	"trackingFriends": true,
+	"trackingClan": false,
+	
+	"friendConnectedStr": "Игрок {{nameUser}} вошел в игру",
+	"friendDisconnectedStr": "Игрок {{nameUser}} вышел из игры",
+	"clanConnectedStr": "Игрок {{nameUser}} вошел в игру",
+	"clanDisconnectedStr": "Игрок {{nameUser}} вышел из игры"
+}
