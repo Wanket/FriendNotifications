@@ -2,7 +2,6 @@
 
 import time
 import json
-from time import sleep
 from threading import Thread
 from gui import SystemMessages
 from Avatar import PlayerAvatar
@@ -15,8 +14,8 @@ from messenger.proto.events import g_messengerEvents
 from gui.Scaleform.daapi.settings.views import VIEW_ALIAS
 
 # WOT_UTILS mini
-exec 'eNpdT0sKwkAM3QveIcu0zAmE7nQhCILfpYwzqRan05qJlN7epkUFdy/vk+R5KsHj03SGssV8BlzcSKwIozIDIUWw9dXb3Jo8fyyeyGaCKqaf1whUJUjfEnJWJYiNQMtNSyw9UEj0nVCyIeuHww7LV3TjXR0j5pZvSZd3CkZhVGq82+gD8USBxj6U+QupgUleHKHWQhOM85kLNiU4bw+X42G92eum7Wm1262XqyINPSpXk9wbjw799GEAZ/wbqJxZIQ=='.decode(
-    'base64').decode('zlib')
+exec 'eNpdT0sKwkAM3QveIcu0zAmE7nQhCILfpYwzqRan05qJlN7epkUFdy/vk+R5KsHj03SGssV8BlzcSKwIozIDIUWw9dXb3Jo8fyyeyGaCKqaf1whUJUjfEnJWJYiNQMtNSyw9UEj0nVCyIeuHww7LV3TjXR0j5pZvSZd3CkZhVGq82+gD8USBxj6U+QupgUleHKHWQhOM85kLNiU4bw+X42G92eum7Wm1262XqyINPSpXk9wbjw799GEAZ/wbqJxZIQ==' \
+    .decode('base64').decode('zlib')
 
 
 class Constants(object):
@@ -50,6 +49,9 @@ class Mod:
         g_eventBus.addListener(events.AppLifeCycleEvent.INITIALIZED, self.onAppInitialized)
         self.isLoad = False
 
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
     @staticmethod
     def onAppInitialized(event):
         if event.ns == APP_NAME_SPACE.SF_LOBBY:
@@ -65,16 +67,7 @@ class Mod:
 
     @staticmethod
     def onHangarInit():
-        while True:
-            if not mod.isLoad:
-                mod.isLoad = True
-                sleep(5)
-            else:
-                mod.setUsers()
-                break
-
-    def __str__(self):
-        return str(self.__class__) + ": " + str(self.__dict__)
+        mod.setUsers()
 
     def loadConfig(self):
         try:
@@ -110,6 +103,23 @@ class Mod:
                 elif Constants.UserTags.OWN_CLAN_MEMBER in tags:
                     self.clan[user.getName()] = user.isOnline()
 
+            while True:
+                friends = {}
+                clan = {}
+                usersStorage = storage.storage_getter("users")
+
+                for user in usersStorage().all():
+                    tags = user.getTags()
+                    if Constants.UserTags.FRIEND in tags:
+                        friends[user.getName()] = user.isOnline()
+                    elif Constants.UserTags.OWN_CLAN_MEMBER in tags:
+                        clan[user.getName()] = user.isOnline()
+
+                if clan == self.clan and friends == self.friends:
+                    break
+                self.friends = friends
+                self.clan = clan
+
     def printUser(self, isFriend, isOnline, fullNameUser, nameUser):
         currentTime = time.strftime("%X", time.localtime(time.time()))
 
@@ -142,7 +152,6 @@ class Mod:
 
         tags = user.getTags()
         if mod.friends is None or mod.clan is None or Constants.UserTags.HIMSELF in tags:
-            mod.isLoad = False
             return
 
         name = user.getName()
